@@ -7,11 +7,16 @@
 //
 //
 //  Forked repo by Ivaylo Getov April 2014
+//
+//  Place ThinkGear.bundle inside "data" folder
 
-#ifndef ofxThinkGear_ofxThinkGear_h
-#define ofxThinkGear_ofxThinkGear_h
 
+#pragma once
 #include "ofMain.h"
+
+#ifdef __APPLE__
+#include "CoreFoundation/CoreFoundation.h"
+#endif
 
 const int TG_BAUDRATE = 9600;
 
@@ -60,15 +65,29 @@ public:
     {
         tgID = _id;
         
-        //        bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
-        //                                                  CFSTR("ThinkGear.bundle"),
-        //                                                  kCFURLPOSIXPathStyle,
-        //                                                  true);
+        //char curPath[1000];
+        //cout << getcwd(curPath, 1000) << endl;
+        //chdir(path);
+        
+#ifdef __APPLE__
+        CFBundleRef mainBundle = CFBundleGetMainBundle();
+        CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
+        char path[PATH_MAX];
+        if (!CFURLGetFileSystemRepresentation(resourcesURL, TRUE, (UInt8 *)path, PATH_MAX))
+        {
+            // error!
+        }
+        CFRelease(resourcesURL);
+        
+        chdir(path);
+        std::cout << "Current Path: " << path << std::endl;
+#endif
         
         bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
-                                                  CFSTR("/Users/ivaylopg/Documents/openFrameworks/addons/ofxThinkGear/lib/ThinkGear.bundle"),
+                                                  CFSTR("../../../data/ThinkGear.bundle"),
                                                   kCFURLPOSIXPathStyle,
                                                   true);
+        
         
         thinkGearBundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
         
@@ -214,6 +233,5 @@ private:
     
     bool bEnableBlinkAsClick;
     int prevBlinkTime;
+    
 };
-
-#endif
