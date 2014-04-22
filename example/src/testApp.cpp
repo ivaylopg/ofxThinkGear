@@ -84,12 +84,12 @@ void testApp::attentionListener(float &param)
 {
     attention = param;
     for (int i=0; i < atts.size(); i++) {
-        atts[i].x+=32;
+        atts[i].x-=32;
     }
     if (atts.size()>32) {
         atts.erase(atts.begin());
     }
-    ofVec2f vA = ofVec2f(0,attention);
+    ofVec2f vA = ofVec2f(ofGetWidth(),attention);
     atts.push_back(vA);
     
 }
@@ -99,12 +99,12 @@ void testApp::meditationListener(float &param)
 {
     meditation = param;
     for (int i=0; i < meds.size(); i++) {
-        meds[i].x+=32;
+        meds[i].x-=32;
     }
     if (meds.size()>32) {
         meds.erase(meds.begin());
     }
-    ofVec2f vM = ofVec2f(0,meditation);
+    ofVec2f vM = ofVec2f(ofGetWidth(),meditation);
     meds.push_back(vM);
 }
 
@@ -158,4 +158,8 @@ void testApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void testApp::dragEvent(ofDragInfo dragInfo){ 
 
+}
+//--------------------------------------------------------------
+void testApp::exit(){
+    thinkGear.freeConnection();
 }

@@ -19,6 +19,7 @@
 #endif
 
 const int TG_BAUDRATE = 9600;
+//const int TG_BAUDRATE = 57600;
 
 // Data format for use with TG_Connect() and TG_SetDataFormat()
 const int TG_STREAM_PACKETS = 0;
@@ -198,6 +199,11 @@ public:
     int getID()
     {
         return tgID;
+    }
+    
+    void freeConnection(){
+        TG_FreeConnection(tgID);
+        ofLog() << "disconnecting connection ID: " << tgID;
     }
     
     ofEvent<float> attentionChangeEvent;
