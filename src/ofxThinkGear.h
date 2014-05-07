@@ -7,8 +7,8 @@
 //
 //
 //  Forked repo by Ivaylo Getov April 2014
-//
 //  Place ThinkGear.bundle inside "data" folder
+//
 
 
 #pragma once
@@ -64,29 +64,42 @@ public:
         isConnected = false;
         prevBlinkTime = 0;
         bEnableBlinkAsClick = false;
+        newInfo = false;
+        ableToConnect = true;
     }
     
     void setup(string deviceName = "/dev/tty.MindWaveMobile-DevA", int _id = 0)
     {
         tgID = _id;
         
-        //char curPath[1000];
-        //cout << getcwd(curPath, 1000) << endl;
-        //chdir(path);
+        //
+        // I was having trouble with discrepancies between xcode's working directory
+        // and the openFramweorks working directory when trying to load a .bundle.
+        // I found the following soulution here: http://stackoverflow.com/a/520951
+        //
+        // This changes xcode's working directory to your app's Resources folder. You can
+        // then access the ThinkGear.bundle in your bin/data/ directory by using "../../../data/ThinkGear.bundle"
+        // or you can add the build script below to your xcode project, which will copy the bundle into
+        // the app's Resources directory (and make the bundle portable with app) and simpy reference "ThinkGear.bundle":
+        //
+        // cp -r bin/data/ThinkGear.bundle "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources";
+        //
+        // -Ivaylo
+        //
         
-#ifdef __APPLE__
-        CFBundleRef mainBundle = CFBundleGetMainBundle();
-        CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
-        char path[PATH_MAX];
-        if (!CFURLGetFileSystemRepresentation(resourcesURL, TRUE, (UInt8 *)path, PATH_MAX))
-        {
-            // error!
-        }
-        CFRelease(resourcesURL);
-        
-        chdir(path);
-        std::cout << "Current Path: " << path << std::endl;
-#endif
+        #ifdef __APPLE__
+                CFBundleRef mainBundle = CFBundleGetMainBundle();
+                CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
+                char path[PATH_MAX];
+                if (!CFURLGetFileSystemRepresentation(resourcesURL, TRUE, (UInt8 *)path, PATH_MAX))
+                {
+                    // error!
+                }
+                CFRelease(resourcesURL);
+                
+                chdir(path);
+                std::cout << "Current Path: " << path << std::endl;
+        #endif
         
         bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
                                                   CFSTR("../../../data/ThinkGear.bundle"),
@@ -137,19 +150,23 @@ public:
         switch (conResult) {
             case -1:
                 ofLog(OF_LOG_FATAL_ERROR) << "\"connectionId\" does not refer to a valid ThinkGear Connection ID handle.";
-                exit(1);
+                //exit(1);
+                ableToConnect = false;
                 break;
             case -2:
                 ofLog(OF_LOG_FATAL_ERROR) << deviceName << " could not be opened. Check that the name is a valid COM port on your system.";
-                exit(1);
+                //exit(1);
+                ableToConnect = false;
                 break;
             case -3:
                 ofLog(OF_LOG_FATAL_ERROR) << "Baudrate is not a valid TG_BAUD_* value.";
-                exit(1);
+                //exit(1);
+                ableToConnect = false;
                 break;
             case -4:
                 ofLog(OF_LOG_FATAL_ERROR) << "serialDataFormat is not a valid TG_STREAM_* type";
-                exit(1);
+                //exit(1);
+                ableToConnect = false;
                 break;
             default:
                 ofLog() << "Connected to ID: " << connectionID << " at: " << deviceName << " ...";
@@ -174,8 +191,12 @@ public:
     {
         if (!autoReading) {
             int numPackets = TG_ReadPackets(connectionID, -1);
+            if (numPackets < 0) {
+                newInfo = false;
+            }
             if (numPackets > 0)
             {
+                newInfo = true;
                 signalQuality = TG_GetValue(connectionID, TG_DATA_POOR_SIGNAL);
                 
                 if (signalQuality == 0.0)
@@ -195,6 +216,7 @@ public:
                      values[9] is TG_DATA_GAMMA2 = 12;
                      */
                     //////////
+                    
                     if (TG_GetValueStatus(connectionID, TG_DATA_ATTENTION) != 0.0)
                     {
                         //float attention = TG_GetValue(connectionID, TG_DATA_ATTENTION);
@@ -385,6 +407,13 @@ public:
         return tgID;
     }
     
+    bool getIsConnected() {
+        return isConnected;
+    }
+    bool getNewInfo() {
+        return newInfo;
+    }
+    
     void freeConnection(){
         if (isConnected) {
             TG_FreeConnection(connectionID);
@@ -402,6 +431,7 @@ public:
     ofEvent<bool> doubleClickEvent;
     
     float values[10];
+    bool ableToConnect;
     
     
 protected:
@@ -425,6 +455,7 @@ private:
     int tgID;
     bool autoReading;
     bool isConnected;
+    bool newInfo;
     
     CFURLRef bundleURL;
     CFBundleRef thinkGearBundle;
