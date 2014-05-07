@@ -10,7 +10,7 @@ ofxThinkGear utilizes [NeuroSky ThinkGear](http://www.neurosky.com/Business/Thin
 Build requirment
 -----------
 
-You need to download ThinkGear.bundle from [here](http://store.neurosky.com/products/developer-tools-2-1) and put it on /lib.
+You need to download ThinkGear.bundle from [here](http://store.neurosky.com/products/developer-tools-2-1) and put it in your project's "data" directory.
 
 Usage
 -----
