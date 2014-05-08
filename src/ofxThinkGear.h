@@ -9,6 +9,11 @@
 //  Forked repo by Ivaylo Getov April 2014
 //  Place ThinkGear.bundle inside "data" folder
 //
+//  TO DO: implement TG_EnableAutoRead fuction:  From API:
+//     "Enabling causes a background thread to be spawned for the
+//     connection (only if one was not already previously spawned),
+//     which continuously calls TG_ReadPacket( connectionId, -1 ) at 1ms intervals."
+//
 
 
 #pragma once
@@ -19,7 +24,6 @@
 #endif
 
 const int TG_BAUDRATE = 9600;
-//const int TG_BAUDRATE = 57600;
 
 // Data format for use with TG_Connect() and TG_SetDataFormat()
 const int TG_STREAM_PACKETS = 0;
@@ -41,6 +45,9 @@ const int TG_DATA_BETA2 = 10;
 const int TG_DATA_GAMMA1 = 11;
 const int TG_DATA_GAMMA2 = 12;
 const int TG_DATA_BLINK_STRENGTH = 37; // min = 0. max = 255.
+
+// Set this to TRUE if you want a connection error to quit your program
+const bool errorExit = false;
 
 
 
@@ -144,28 +151,36 @@ public:
         connectionID = TG_GetNewConnectionId();
         
         ofLog() << "Connecting to " << deviceName << " ...";
-        int conResult = TG_Connect(connectionID, deviceName.c_str(), TG_BAUDRATE, TG_STREAM_PACKETS);
         
+        int conResult = TG_Connect(connectionID, deviceName.c_str(), TG_BAUDRATE, TG_STREAM_PACKETS);
         
         switch (conResult) {
             case -1:
                 ofLog(OF_LOG_FATAL_ERROR) << "\"connectionId\" does not refer to a valid ThinkGear Connection ID handle.";
-                //exit(1);
+                if (errorExit) {
+                    exit(1);
+                }
                 ableToConnect = false;
                 break;
             case -2:
                 ofLog(OF_LOG_FATAL_ERROR) << deviceName << " could not be opened. Check that the name is a valid COM port on your system.";
-                //exit(1);
+                if (errorExit) {
+                    exit(1);
+                }
                 ableToConnect = false;
                 break;
             case -3:
                 ofLog(OF_LOG_FATAL_ERROR) << "Baudrate is not a valid TG_BAUD_* value.";
-                //exit(1);
+                if (errorExit) {
+                    exit(1);
+                }
                 ableToConnect = false;
                 break;
             case -4:
                 ofLog(OF_LOG_FATAL_ERROR) << "serialDataFormat is not a valid TG_STREAM_* type";
-                //exit(1);
+                if (errorExit) {
+                    exit(1);
+                }
                 ableToConnect = false;
                 break;
             default:
@@ -174,7 +189,7 @@ public:
                 break;
         }
         
-        /*
+        /* Non-specific errors
         if (conResult != 0)
         {
             ofLog(OF_LOG_FATAL_ERROR) << "Error: Connection Failed!";
@@ -190,7 +205,13 @@ public:
     void update()
     {
         if (!autoReading) {
+            
+            // From API:
+            // "While background auto-reading is enabled, the TG_GetValueStatus() function
+            // is pretty much useless. Also, the TG_ReadPackets() function should probably not be called."
+            
             int numPackets = TG_ReadPackets(connectionID, -1);
+            
             if (numPackets < 0) {
                 newInfo = false;
             }
@@ -202,7 +223,7 @@ public:
                 if (signalQuality == 0.0)
                 {
                     /*
-                     values array is:
+                     reminder: values array is:
                      
                      values[0] is TG_DATA_ATTENTION = 2;
                      values[1] is TG_DATA_MEDITATION = 3;
@@ -230,7 +251,7 @@ public:
                         values[1] = TG_GetValue(connectionID, TG_DATA_MEDITATION);
                         ofNotifyEvent(meditationChangeEvent, values[1]);
                     }
-                    //////////
+                    ////////// Events can be added for any of the available data points
                     if (TG_GetValueStatus(connectionID, TG_DATA_DELTA) != 0.0)
                     {
                         values[2] = TG_GetValue(connectionID, TG_DATA_DELTA);
@@ -303,8 +324,9 @@ public:
     void autoUpdate()
     {
         if (autoReading) {
-            // While background auto-reading is enabled, the TG_GetValueStatus() function
-            // is pretty much useless. Also, the TG_ReadPackets() function should probably not be called.
+            // From API:
+            // "While background auto-reading is enabled, the TG_GetValueStatus() function
+            // is pretty much useless. Also, the TG_ReadPackets() function should probably not be called."
             
             signalQuality = TG_GetValue(connectionID, TG_DATA_POOR_SIGNAL);
             
@@ -314,7 +336,7 @@ public:
             {
                 
                 /*
-                 values array is:
+                 reminder: values array is:
                  
                  values[0] is TG_DATA_ATTENTION = 2;
                  values[1] is TG_DATA_MEDITATION = 3;
@@ -329,22 +351,22 @@ public:
                  */
                 
                 
+                /* IN PROGRESS
+                 
                 values[0] = TG_GetValue(connectionID, TG_DATA_ATTENTION);
                 values[1] = TG_GetValue(connectionID, TG_DATA_MEDITATION);
                 
                 for (int i=2; i<10; i++) {
                     values[i] = TG_GetValue(connectionID, i+3);
                 }
-                
-                //Implement some blink shiz?
-                
-                //cout << values[0] << endl;
+                */
             }
         } else {
             cout << "Autoreading is disabled! Use update() instead." << endl;
         }
     }
     
+    // AutoRead Functions ////////////////////
     void startAutoRead() {
         if (isConnected){
             int aReadStatus = TG_EnableAutoRead(connectionID,1);
@@ -386,6 +408,7 @@ public:
                 break;
         }
     }
+    // End AutoRead Functions ////////////////
     
     void enableBlinkAsClick()
     {
@@ -425,11 +448,14 @@ public:
     ofEvent<float> attentionChangeEvent;
     ofEvent<float> meditationChangeEvent;
     ofEvent<float> blinkChangeEvent;
+    // add more events as needed
+    
     
     // blink as click event
     ofEvent<bool> singleClickEvent;
     ofEvent<bool> doubleClickEvent;
     
+    // an array to hold values read from headset
     float values[10];
     bool ableToConnect;
     
@@ -447,8 +473,6 @@ protected:
     int (*TG_EnableBlinkDetection)(int, int);
     int (*TG_EnableAutoRead)(int,int);
     
-    //TG_Connect (int connectionId, const char *serialPortName, int serialBaudrate, int serialDataFormat)
-    //TG_EnableAutoRead (int connectionId, int enable)
     
 private:
     
