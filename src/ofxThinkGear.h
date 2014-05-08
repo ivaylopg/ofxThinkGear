@@ -93,6 +93,7 @@ public:
         //
         // -Ivaylo
         //
+        //////////////////
         
         #ifdef __APPLE__
                 CFBundleRef mainBundle = CFBundleGetMainBundle();
@@ -107,6 +108,8 @@ public:
                 chdir(path);
                 std::cout << "Current Path: " << path << std::endl;
         #endif
+        
+        //////////////////
         
         bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
                                                   CFSTR("../../../data/ThinkGear.bundle"),
@@ -205,7 +208,6 @@ public:
     void update()
     {
         if (!autoReading) {
-            
             // From API:
             // "While background auto-reading is enabled, the TG_GetValueStatus() function
             // is pretty much useless. Also, the TG_ReadPackets() function should probably not be called."
@@ -225,16 +227,16 @@ public:
                     /*
                      reminder: values array is:
                      
-                     values[0] is TG_DATA_ATTENTION = 2;
-                     values[1] is TG_DATA_MEDITATION = 3;
-                     values[2] is TG_DATA_DELTA = 5;
-                     values[3] is TG_DATA_THETA = 6;
-                     values[4] is TG_DATA_ALPHA1 = 7;
-                     values[5] is TG_DATA_ALPHA2 = 8;
-                     values[6] is TG_DATA_BETA1 = 9;
-                     values[7] is TG_DATA_BETA2 = 10;
-                     values[8] is TG_DATA_GAMMA1 = 11;
-                     values[9] is TG_DATA_GAMMA2 = 12;
+                     values[0] is Attention
+                     values[1] is Meditation
+                     values[2] is Delta
+                     values[3] is Theta
+                     values[4] is Alpha 1
+                     values[5] is Alpha 2
+                     values[6] is Beta 1
+                     values[7] is Beta 2
+                     values[8] is Gamma 1
+                     values[9] is Gamma 2
                      */
                     //////////
                     
@@ -255,41 +257,49 @@ public:
                     if (TG_GetValueStatus(connectionID, TG_DATA_DELTA) != 0.0)
                     {
                         values[2] = TG_GetValue(connectionID, TG_DATA_DELTA);
+                        ofNotifyEvent(deltaChangeEvent, values[2]);
                     }
                     //////////
                     if (TG_GetValueStatus(connectionID, TG_DATA_THETA) != 0.0)
                     {
                         values[3] = TG_GetValue(connectionID, TG_DATA_THETA);
+                        ofNotifyEvent(thetaChangeEvent, values[3]);
                     }
                     //////////
                     if (TG_GetValueStatus(connectionID, TG_DATA_ALPHA1) != 0.0)
                     {
                         values[4] = TG_GetValue(connectionID, TG_DATA_ALPHA1);
+                        ofNotifyEvent(alpha1ChangeEvent, values[4]);
                     }
                     //////////
                     if (TG_GetValueStatus(connectionID, TG_DATA_ALPHA2) != 0.0)
                     {
                         values[5] = TG_GetValue(connectionID, TG_DATA_ALPHA2);
+                        ofNotifyEvent(alpha2ChangeEvent, values[5]);
                     }
                     //////////
                     if (TG_GetValueStatus(connectionID, TG_DATA_BETA1) != 0.0)
                     {
                         values[6] = TG_GetValue(connectionID, TG_DATA_BETA1);
+                        ofNotifyEvent(beta1ChangeEvent, values[6]);
                     }
                     //////////
                     if (TG_GetValueStatus(connectionID, TG_DATA_BETA2) != 0.0)
                     {
                         values[7] = TG_GetValue(connectionID, TG_DATA_BETA2);
+                        ofNotifyEvent(beta2ChangeEvent, values[7]);
                     }
                     //////////
                     if (TG_GetValueStatus(connectionID, TG_DATA_GAMMA1) != 0.0)
                     {
                         values[8] = TG_GetValue(connectionID, TG_DATA_GAMMA1);
+                        ofNotifyEvent(gamma1ChangeEvent, values[8]);
                     }
                     //////////
                     if (TG_GetValueStatus(connectionID, TG_DATA_GAMMA2) != 0.0)
                     {
                         values[9] = TG_GetValue(connectionID, TG_DATA_GAMMA2);
+                        ofNotifyEvent(gamma2ChangeEvent, values[9]);
                     }
                     //////////
                     
@@ -338,16 +348,16 @@ public:
                 /*
                  reminder: values array is:
                  
-                 values[0] is TG_DATA_ATTENTION = 2;
-                 values[1] is TG_DATA_MEDITATION = 3;
-                 values[2] is TG_DATA_DELTA = 5;
-                 values[3] is TG_DATA_THETA = 6;
-                 values[4] is TG_DATA_ALPHA1 = 7;
-                 values[5] is TG_DATA_ALPHA2 = 8;
-                 values[6] is TG_DATA_BETA1 = 9;
-                 values[7] is TG_DATA_BETA2 = 10;
-                 values[8] is TG_DATA_GAMMA1 = 11;
-                 values[9] is TG_DATA_GAMMA2 = 12;
+                 values[0] is Attention
+                 values[1] is Meditation
+                 values[2] is Delta
+                 values[3] is Theta
+                 values[4] is Alpha 1
+                 values[5] is Alpha 2
+                 values[6] is Beta 1
+                 values[7] is Beta 2
+                 values[8] is Gamma 1
+                 values[9] is Gamma 2
                  */
                 
                 
@@ -422,7 +432,12 @@ public:
     
     float getSignalQuality()
     {
-        return signalQuality;
+        if (isConnected) {
+            return signalQuality;
+        } else {
+            return 300.0;
+        }
+        
     }
     
     int getID()
@@ -447,8 +462,15 @@ public:
     
     ofEvent<float> attentionChangeEvent;
     ofEvent<float> meditationChangeEvent;
+    ofEvent<float> deltaChangeEvent;
+    ofEvent<float> thetaChangeEvent;
+    ofEvent<float> alpha1ChangeEvent;
+    ofEvent<float> alpha2ChangeEvent;
+    ofEvent<float> beta1ChangeEvent;
+    ofEvent<float> beta2ChangeEvent;
+    ofEvent<float> gamma1ChangeEvent;
+    ofEvent<float> gamma2ChangeEvent;
     ofEvent<float> blinkChangeEvent;
-    // add more events as needed
     
     
     // blink as click event

@@ -10,9 +10,42 @@ void testApp::setup(){
     ofAddListener(thinkGear.meditationChangeEvent, this, &testApp::meditationListener);
     ofAddListener(thinkGear.blinkChangeEvent, this, &testApp::blinkListener);
     
+    
+    ofAddListener(thinkGear.deltaChangeEvent, this, &testApp::deltaListener);
+    ofAddListener(thinkGear.thetaChangeEvent, this, &testApp::thetaListener);
+    ofAddListener(thinkGear.alpha1ChangeEvent, this, &testApp::alpha1Listener);
+    ofAddListener(thinkGear.alpha2ChangeEvent, this, &testApp::alpha2Listener);
+    ofAddListener(thinkGear.beta1ChangeEvent, this, &testApp::beta1Listener);
+    ofAddListener(thinkGear.beta2ChangeEvent, this, &testApp::beta2Listener);
+    ofAddListener(thinkGear.gamma1ChangeEvent, this, &testApp::gamma1Listener);
+    ofAddListener(thinkGear.gamma2ChangeEvent, this, &testApp::gamma2Listener);
+    
+    /*
+     All of the available data points triggger ofEvents when they are updated. You only
+     need to declare and use the ones you need (usually just attention and meditation)
+     
+     Even though you are calling thinkGear.update() every time through testApp::update(),
+     you will only get an event when the headset has new data, which is about once
+     a second. 
+     
+     This also ensures you are not reassigning old data to a variable or, in this
+     example, the graph will only grow when the data is updated.
+     
+     Make sure you call thinkGear.freeConnection() in testApp::exit() to properly 
+     close the connection to the headset.
+     */
+    
     attention = 0.0;
     meditation = 0.0;
     numBlinks = 0;
+    delta = 0.0;
+    theta = 0.0;
+    alpha1 = 0.0;
+    alpha2 = 0.0;
+    beta1 = 0.0;
+    beta2 = 0.0;
+    gamma1 = 0.0;
+    gamma2 = 0.0;
 
 }
 
@@ -26,17 +59,17 @@ void testApp::draw(){
     ofBackground(0);
     ofSetColor(255);
     string qStr = "";
-    if (thinkGear.getSignalQuality() == 0.0)
-    {
+    
+    if (thinkGear.getSignalQuality() == 300.0) {
+        qStr = "there is no headset connected!";
+    } else if (thinkGear.getSignalQuality() == 0.0) {
         qStr = "good";
-    }
-    else
-    {
+    } else {
         qStr = "poor (" + ofToString(thinkGear.getSignalQuality()) + ")";
     }
     
     ofDrawBitmapString("Signal Quality: " + qStr, 20,20);
-    ofDrawBitmapString("Number of Blinks: " + ofToString(numBlinks), 20,40);
+    ofDrawBitmapString("Number of Blinks: " + ofToString(numBlinks) + " [" + ofToString(lastBlinkVal) + "]", 20,40);
     
     avgAtt = 0;
     avgMed = 0;
@@ -73,9 +106,16 @@ void testApp::draw(){
     }
     
     
-    
-    
-    
+    ofSetColor(255);
+    ofDrawBitmapString("Delta: " +      ofToString(delta,3) +
+                       "\nTheta: " +      ofToString(theta,3) +
+                       "\nAlpha 1: " +    ofToString(alpha1,3) +
+                       "\nAlpha 2: " +    ofToString(alpha2,3) +
+                       "\nBeta 1: " +     ofToString(beta1,3) +
+                       "\nBeta 2: " +     ofToString(beta2,3) +
+                       "\nGamma 1: " +    ofToString(gamma1,3) +
+                       "\nGamma 2: " +    ofToString(gamma2,3)
+                       , 20, ofGetHeight()-150);
     
 }
 
@@ -112,53 +152,57 @@ void testApp::meditationListener(float &param)
 void testApp::blinkListener(float &param)
 {
     numBlinks++;
-    cout << param << endl;
+    lastBlinkVal = param;
 }
 
 //--------------------------------------------------------------
-void testApp::keyPressed(int key){
-
+void testApp::deltaListener(float &param)
+{
+    delta = param;
 }
 
 //--------------------------------------------------------------
-void testApp::keyReleased(int key){
-
+void testApp::thetaListener(float &param)
+{
+    theta = param;
 }
 
 //--------------------------------------------------------------
-void testApp::mouseMoved(int x, int y ){
-
+void testApp::alpha1Listener(float &param)
+{
+    alpha1 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::mouseDragged(int x, int y, int button){
-
+void testApp::alpha2Listener(float &param)
+{
+    alpha2 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::mousePressed(int x, int y, int button){
-
+void testApp::beta1Listener(float &param)
+{
+    beta1 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::mouseReleased(int x, int y, int button){
-
+void testApp::beta2Listener(float &param)
+{
+    beta2 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::windowResized(int w, int h){
-
+void testApp::gamma1Listener(float &param)
+{
+    gamma1 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::gotMessage(ofMessage msg){
-
+void testApp::gamma2Listener(float &param)
+{
+    gamma2 = param;
 }
 
-//--------------------------------------------------------------
-void testApp::dragEvent(ofDragInfo dragInfo){ 
-
-}
 //--------------------------------------------------------------
 void testApp::exit(){
     thinkGear.freeConnection();
