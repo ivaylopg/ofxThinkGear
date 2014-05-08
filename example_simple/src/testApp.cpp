@@ -21,15 +21,14 @@ void testApp::setup(){
     ofAddListener(thinkGear.gamma2ChangeEvent, this, &testApp::gamma2Listener);
     
     /*
-     All of the available data points triggger ofEvents when they are updated. You only
-     need to declare and use the ones you need (usually just attention and meditation)
+     All of the available data points triggger ofEvents when they are updated. You only 
+     need to declare listeners for the ones you need (usually just attention and meditation).
      
-     Even though you are calling thinkGear.update() every time through testApp::update(),
-     you will only get an event when the headset has new data, which is about once
-     a second. 
+     Even though you are calling thinkGear.update() every time through testApp::update(), 
+     you will only get an event when the headset has new data, which is about once a second.
      
-     This also ensures you are not reassigning old data to a variable or, in this
-     example, the graph will only grow when the data is updated.
+     This also ensures you are not reassigning old data to a variable. In this example, 
+     the graph will only grow when the data is updated.
      
      Make sure you call thinkGear.freeConnection() in testApp::exit() to properly 
      close the connection to the headset.
