@@ -19,44 +19,28 @@ void ofxThinkGear::reset(){
     TG_Disconnect = NULL;
     TG_FreeConnection = NULL;
     TG_EnableBlinkDetection = NULL;
-    tgID = 0;
     autoReading = false;
     isConnected = false;
     prevBlinkTime = 0;
     bEnableBlinkAsClick = false;
     newInfo = false;
-    ableToConnect = true;
+    ableToConnect = false;
+    connectionID = -1;
 }
 
 //--------------------------------------------------------------
-void ofxThinkGear::setup(string deviceName, int _id) {
+void ofxThinkGear::setup(string deviceName) {
     // Defaults:
     // deviceName = "/dev/tty.MindWaveMobile-DevA";
-    // _id = 0;
     
-    tgID = _id;
     
 #ifdef __APPLE__
     
-    /*
-     *
-     * I was having trouble with discrepancies between xcode's working directory
-     * and the openFramweorks working directory when trying to load the ThinkGear.bundle.
-     * I found the following soulution here: http://stackoverflow.com/a/520951
-     *
-     * This makes sure that the working directory is your .app's "Resources" folder.
-     * (This is seperate from setting the location of the openFrameworks data directory)
-     *
-     * Assuming your app is still in the bin folder, and your project is still in the OF
-     * file hierarchy, it then finds the ThinkGear.bundle in addons/ofxThinkGear/lib/ directory 
-     * by using "../../../../../../../addons/ofxThinkGear/lib/ThinkGear.bundle"
-     *
-     * See note below to make the app portable
-     *
-     * -Ivaylo
-     *
-     */
-    
+    /* * *
+     
+     I was having trouble with discrepancies between xcode's working directory and the openFramweorks working directory when trying to load the ThinkGear.bundle. I found the following soulution here: http://stackoverflow.com/a/520951
+     
+     * * */
     
     
     CFBundleRef mainBundle = CFBundleGetMainBundle();
@@ -69,48 +53,54 @@ void ofxThinkGear::setup(string deviceName, int _id) {
     CFRelease(resourcesURL);
     chdir(path);
     std::cout << "Current Path: " << path << std::endl;
-
     
-    /*
-     * If you want to make the app portable, the ThinkGear.bundle needs
-     * travel with your app.
-     *
-     * In Xcode, you can add the build script below to your xcode project,
-     * which will copy the "data" directory into the app's Resources directory:
-     *
+    
+    /* * *
+     
+     This makes sure that the working directory is your .app's "Resources" folder. (This is seperate from setting the location of the openFrameworks data directory)
+     
+     Assuming your app is still in the bin folder, and your project is still in the OF file hierarchy, it then finds the ThinkGear.bundle in OF_ROOT/addons/ofxThinkGear/lib/ directory by using "../../../../../../../addons/ofxThinkGear/lib/ThinkGear.bundle"
+     
+     
+     If you want to make the app portable, the ThinkGear.bundle needs to travel with your app.
+     
+     First, copy ThinkGear.bundle into your bin/data directory.
+     
+     In Xcode, you have to add the build script below to your xcode project, which will copy the data directory into the .app's Resources directory:
      
          cp -r bin/data/ThinkGear.bundle "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources";
      
-     *
-     * Then #define OF_RELEASE in your header, or add OF_RELEASE as a preprocessor macro in your build settings
-     */
+     Then #define OF_RELEASE in your header, or add OF_RELEASE as a preprocessor macro in your build settings
+     
+     * * */
     
-#ifdef OF_RELEASE
-    bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
-                                              CFSTR("data/ThinkGear.bundle"),
-                                              kCFURLPOSIXPathStyle,
-                                              true);
-#else
-    bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
-                                              CFSTR("../../../../../../../addons/ofxThinkGear/lib/ThinkGear.bundle"),
-                                              kCFURLPOSIXPathStyle,
-                                              true);
-#endif
+    #ifdef OF_RELEASE
+        bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
+                                                  CFSTR("data/ThinkGear.bundle"),
+                                                  kCFURLPOSIXPathStyle,
+                                                  true);
+    #else
+        bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
+                                                  CFSTR("../../../../../../../addons/ofxThinkGear/lib/ThinkGear.bundle"),
+                                                  kCFURLPOSIXPathStyle,
+                                                  true);
+    #endif
 #endif
     
-    cout << bundleURL << endl;
-    string appPath = ofFilePath::getAbsolutePath(ofFilePath::getCurrentExePath());
-    cout << appPath << endl;
+    //cout << "curr dir: " << ofFilePath::getCurrentWorkingDirectory() << endl;
     
     thinkGearBundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
     
     if (!thinkGearBundle)
     {
         ofLog(OF_LOG_FATAL_ERROR) << "Error: Could not find ThinkGear.bundle. Does it exist in the current directory?";
-        exit(1);
+        if (errorExit) {
+            exit(1);
+        }
+        return;
     }
     
-    // set func ptrs
+    // set function pointers
     TG_GetDriverVersion = (int(*)())CFBundleGetFunctionPointerForName(thinkGearBundle, CFSTR("TG_GetDriverVersion"));
     TG_GetNewConnectionId = (int(*)())CFBundleGetFunctionPointerForName(thinkGearBundle, CFSTR("TG_GetNewConnectionId"));
     TG_Connect = (int(*)(int, const char*, int, int))CFBundleGetFunctionPointerForName(thinkGearBundle, CFSTR("TG_Connect"));
@@ -133,7 +123,10 @@ void ofxThinkGear::setup(string deviceName, int _id) {
         !TG_EnableAutoRead)
     {
         ofLog(OF_LOG_FATAL_ERROR) << "Error: Expected functions in ThinkGear.bundle were not found.";
-        exit(1);
+        if (errorExit) {
+            exit(1);
+        }
+        return;
     }
     
     connectionID = TG_GetNewConnectionId();
@@ -143,47 +136,42 @@ void ofxThinkGear::setup(string deviceName, int _id) {
     int conResult = TG_Connect(connectionID, deviceName.c_str(), TG_BAUDRATE, TG_STREAM_PACKETS);
     
     switch (conResult) {
+        case 0:
+            ofLog() << "Connected to ID: " << connectionID << " at: " << deviceName << " ...";
+            ableToConnect = true;
+            isConnected = true;
+            break;
         case -1:
             ofLog(OF_LOG_FATAL_ERROR) << "\"connectionId\" does not refer to a valid ThinkGear Connection ID handle.";
             if (errorExit) {
                 exit(1);
             }
-            ableToConnect = false;
             break;
         case -2:
             ofLog(OF_LOG_FATAL_ERROR) << deviceName << " could not be opened. Check that the name is a valid COM port on your system.";
             if (errorExit) {
                 exit(1);
             }
-            ableToConnect = false;
             break;
         case -3:
             ofLog(OF_LOG_FATAL_ERROR) << "Baudrate is not a valid TG_BAUD_* value.";
             if (errorExit) {
                 exit(1);
             }
-            ableToConnect = false;
             break;
         case -4:
             ofLog(OF_LOG_FATAL_ERROR) << "serialDataFormat is not a valid TG_STREAM_* type";
             if (errorExit) {
                 exit(1);
             }
-            ableToConnect = false;
             break;
         default:
-            ofLog() << "Connected to ID: " << connectionID << " at: " << deviceName << " ...";
-            isConnected = true;
+            ofLog(OF_LOG_FATAL_ERROR) << "Error: ThinkGear connection failed.";
+            if (errorExit) {
+                exit(1);
+            }
             break;
     }
-    
-    /* Non-specific errors
-     if (conResult != 0)
-     {
-     ofLog(OF_LOG_FATAL_ERROR) << "Error: Connection Failed!";
-     exit(1);
-     }
-     */
     
     int resBlink = TG_EnableBlinkDetection(connectionID, 1);
     if (resBlink != 0)
@@ -432,7 +420,7 @@ float ofxThinkGear::getSignalQuality() {
 
 //--------------------------------------------------------------
 int ofxThinkGear::getID() {
-    return tgID;
+    return connectionID;
 }
 
 //--------------------------------------------------------------

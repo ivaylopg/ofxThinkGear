@@ -59,7 +59,7 @@ public:
     ~ofxThinkGear();
     
     void reset();
-    void setup(string deviceName = "/dev/tty.MindWaveMobile-DevA", int _id = 0);
+    void setup(string deviceName = "/dev/tty.MindWaveMobile-DevA");
     
     void update();
     void autoUpdate();
@@ -116,8 +116,6 @@ protected:
     
     
 private:
-    
-    int tgID;
     bool autoReading;
     bool isConnected;
     bool newInfo;
