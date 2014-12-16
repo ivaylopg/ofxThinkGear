@@ -41,15 +41,15 @@ void ofxThinkGear::setup(string deviceName, int _id) {
     /*
      *
      * I was having trouble with discrepancies between xcode's working directory
-     * and the openFramweorks working directory when trying to load a .bundle.
+     * and the openFramweorks working directory when trying to load the ThinkGear.bundle.
      * I found the following soulution here: http://stackoverflow.com/a/520951
      *
-     * This changes the working directory to your app's Resources folder. 
+     * This makes sure that the working directory is your .app's "Resources" folder.
      * (This is seperate from setting the location of the openFrameworks data directory)
      *
-     * Assuming your app is still in the bin folder, you can then access the 
-     * ThinkGear.bundle in your bin/data/ directory by using "../../../data/ThinkGear.bundle"
-     * or in the addon
+     * Assuming your app is still in the bin folder, and your project is still in the OF
+     * file hierarchy, it then finds the ThinkGear.bundle in addons/ofxThinkGear/lib/ directory 
+     * by using "../../../../../../../addons/ofxThinkGear/lib/ThinkGear.bundle"
      *
      * See note below to make the app portable
      *
@@ -59,7 +59,6 @@ void ofxThinkGear::setup(string deviceName, int _id) {
     
     
     
-    /*
     CFBundleRef mainBundle = CFBundleGetMainBundle();
     CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
     char path[PATH_MAX];
@@ -68,10 +67,8 @@ void ofxThinkGear::setup(string deviceName, int _id) {
         // error!
     }
     CFRelease(resourcesURL);
-    
     chdir(path);
     std::cout << "Current Path: " << path << std::endl;
-    */
 
     
     /*
@@ -94,13 +91,6 @@ void ofxThinkGear::setup(string deviceName, int _id) {
                                               kCFURLPOSIXPathStyle,
                                               true);
 #else
-    /*
-    bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
-                                              CFSTR("../../../data/ThinkGear.bundle"),
-                                              kCFURLPOSIXPathStyle,
-                                              true);
-    */
-    
     bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
                                               CFSTR("../../../../../../../addons/ofxThinkGear/lib/ThinkGear.bundle"),
                                               kCFURLPOSIXPathStyle,
