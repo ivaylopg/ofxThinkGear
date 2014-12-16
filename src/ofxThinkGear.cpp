@@ -57,7 +57,9 @@ void ofxThinkGear::setup(string deviceName, int _id) {
      *
      */
     
-
+    
+    
+    /*
     CFBundleRef mainBundle = CFBundleGetMainBundle();
     CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
     char path[PATH_MAX];
@@ -69,6 +71,7 @@ void ofxThinkGear::setup(string deviceName, int _id) {
     
     chdir(path);
     std::cout << "Current Path: " << path << std::endl;
+    */
 
     
     /*
@@ -91,13 +94,23 @@ void ofxThinkGear::setup(string deviceName, int _id) {
                                               kCFURLPOSIXPathStyle,
                                               true);
 #else
+    /*
     bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
                                               CFSTR("../../../data/ThinkGear.bundle"),
+                                              kCFURLPOSIXPathStyle,
+                                              true);
+    */
+    
+    bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
+                                              CFSTR("../../../../../../../addons/ofxThinkGear/lib/ThinkGear.bundle"),
                                               kCFURLPOSIXPathStyle,
                                               true);
 #endif
 #endif
     
+    cout << bundleURL << endl;
+    string appPath = ofFilePath::getAbsolutePath(ofFilePath::getCurrentExePath());
+    cout << appPath << endl;
     
     thinkGearBundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
     
