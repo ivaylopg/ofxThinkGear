@@ -74,6 +74,26 @@ public:
         newInfo = false;
         ableToConnect = true;
     }
+    ~ofxThinkGear(){}
+    
+    void reset(){
+        thinkGearBundle = NULL;
+        TG_GetDriverVersion = NULL;
+        TG_GetNewConnectionId = NULL;
+        TG_ReadPackets = NULL;
+        TG_GetValue = NULL;
+        TG_GetValueStatus = NULL;
+        TG_Disconnect = NULL;
+        TG_FreeConnection = NULL;
+        TG_EnableBlinkDetection = NULL;
+        tgID = 0;
+        autoReading = false;
+        isConnected = false;
+        prevBlinkTime = 0;
+        bEnableBlinkAsClick = false;
+        newInfo = false;
+        ableToConnect = true;
+    }
     
     void setup(string deviceName = "/dev/tty.MindWaveMobile-DevA", int _id = 0)
     {
@@ -95,26 +115,32 @@ public:
         //
         //////////////////
         
-        #ifdef __APPLE__
-                CFBundleRef mainBundle = CFBundleGetMainBundle();
-                CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
-                char path[PATH_MAX];
-                if (!CFURLGetFileSystemRepresentation(resourcesURL, TRUE, (UInt8 *)path, PATH_MAX))
-                {
-                    // error!
-                }
-                CFRelease(resourcesURL);
-                
-                chdir(path);
-                std::cout << "Current Path: " << path << std::endl;
-        #endif
+#ifdef __APPLE__
+        CFBundleRef mainBundle = CFBundleGetMainBundle();
+        CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
+        char path[PATH_MAX];
+        if (!CFURLGetFileSystemRepresentation(resourcesURL, TRUE, (UInt8 *)path, PATH_MAX))
+        {
+            // error!
+        }
+        CFRelease(resourcesURL);
+        
+        chdir(path);
+        std::cout << "Current Path: " << path << std::endl;
+#endif
         
         //////////////////
-        
+#ifdef OF_RELEASE
+        bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
+                                                  CFSTR("data/ThinkGear.bundle"),
+                                                  kCFURLPOSIXPathStyle,
+                                                  true);
+#else
         bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
                                                   CFSTR("../../../data/ThinkGear.bundle"),
                                                   kCFURLPOSIXPathStyle,
                                                   true);
+#endif
         
         
         thinkGearBundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
@@ -193,12 +219,12 @@ public:
         }
         
         /* Non-specific errors
-        if (conResult != 0)
-        {
-            ofLog(OF_LOG_FATAL_ERROR) << "Error: Connection Failed!";
-            exit(1);
-        }
-        */
+         if (conResult != 0)
+         {
+         ofLog(OF_LOG_FATAL_ERROR) << "Error: Connection Failed!";
+         exit(1);
+         }
+         */
         
         int resBlink = TG_EnableBlinkDetection(connectionID, 1);
         if (resBlink != 0)
@@ -214,12 +240,12 @@ public:
             
             int numPackets = TG_ReadPackets(connectionID, -1);
             
-            if (numPackets < 0) {
+            if (numPackets <= 0) {  /// <-------- changed to <=
                 newInfo = false;
             }
             if (numPackets > 0)
             {
-                newInfo = true;
+                //newInfo = true;
                 signalQuality = TG_GetValue(connectionID, TG_DATA_POOR_SIGNAL);
                 
                 if (signalQuality == 0.0)
@@ -239,6 +265,8 @@ public:
                      values[9] is Gamma 2
                      */
                     //////////
+                    
+                    newInfo = true;
                     
                     if (TG_GetValueStatus(connectionID, TG_DATA_ATTENTION) != 0.0)
                     {
@@ -324,6 +352,8 @@ public:
                             prevBlinkTime = ofGetElapsedTimeMillis();
                         }
                     }
+                } else {
+                    newInfo = false;
                 }
             }
         } else {
@@ -363,13 +393,13 @@ public:
                 
                 /* IN PROGRESS
                  
-                values[0] = TG_GetValue(connectionID, TG_DATA_ATTENTION);
-                values[1] = TG_GetValue(connectionID, TG_DATA_MEDITATION);
-                
-                for (int i=2; i<10; i++) {
-                    values[i] = TG_GetValue(connectionID, i+3);
-                }
-                */
+                 values[0] = TG_GetValue(connectionID, TG_DATA_ATTENTION);
+                 values[1] = TG_GetValue(connectionID, TG_DATA_MEDITATION);
+                 
+                 for (int i=2; i<10; i++) {
+                 values[i] = TG_GetValue(connectionID, i+3);
+                 }
+                 */
             }
         } else {
             cout << "Autoreading is disabled! Use update() instead." << endl;
@@ -457,7 +487,9 @@ public:
             TG_FreeConnection(connectionID);
             ofLog() << "disconnecting connection ID: " << connectionID;
             isConnected = false;
+            cout << "freed connection" << endl;
         }
+        
     }
     
     ofEvent<float> attentionChangeEvent;
