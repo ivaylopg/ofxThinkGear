@@ -51,8 +51,8 @@ const bool errorExit = false;
 
 
 
-class ofxThinkGear
-{
+class ofxThinkGear {
+    
 public:
     
     ofxThinkGear();

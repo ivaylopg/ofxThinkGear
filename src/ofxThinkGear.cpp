@@ -44,7 +44,7 @@ void ofxThinkGear::reset(){
 }
 
 //--------------------------------------------------------------
-void ofxThinkGear::setup(string deviceName = "/dev/tty.MindWaveMobile-DevA", int _id = 0) {
+void ofxThinkGear::setup(string deviceName, int _id) {
     
     tgID = _id;
     
