@@ -2,22 +2,7 @@
 
 
 ofxThinkGear::ofxThinkGear() {
-    thinkGearBundle = NULL;
-    TG_GetDriverVersion = NULL;
-    TG_GetNewConnectionId = NULL;
-    TG_ReadPackets = NULL;
-    TG_GetValue = NULL;
-    TG_GetValueStatus = NULL;
-    TG_Disconnect = NULL;
-    TG_FreeConnection = NULL;
-    TG_EnableBlinkDetection = NULL;
-    tgID = 0;
-    autoReading = false;
-    isConnected = false;
-    prevBlinkTime = 0;
-    bEnableBlinkAsClick = false;
-    newInfo = false;
-    ableToConnect = true;
+    reset();
 }
 
 //--------------------------------------------------------------
@@ -45,26 +30,34 @@ void ofxThinkGear::reset(){
 
 //--------------------------------------------------------------
 void ofxThinkGear::setup(string deviceName, int _id) {
+    // Defaults:
+    // deviceName = "/dev/tty.MindWaveMobile-DevA";
+    // _id = 0;
     
     tgID = _id;
     
-    //
-    // I was having trouble with discrepancies between xcode's working directory
-    // and the openFramweorks working directory when trying to load a .bundle.
-    // I found the following soulution here: http://stackoverflow.com/a/520951
-    //
-    // This changes xcode's working directory to your app's Resources folder. You can
-    // then access the ThinkGear.bundle in your bin/data/ directory by using "../../../data/ThinkGear.bundle"
-    // or you can add the build script below to your xcode project, which will copy the bundle into
-    // the app's Resources directory (and make the bundle portable with app) and simpy reference "ThinkGear.bundle":
-    //
-    // cp -r bin/data/ThinkGear.bundle "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources";
-    //
-    // -Ivaylo
-    //
-    //////////////////
-    
 #ifdef __APPLE__
+    
+    /*
+     *
+     * I was having trouble with discrepancies between xcode's working directory
+     * and the openFramweorks working directory when trying to load a .bundle.
+     * I found the following soulution here: http://stackoverflow.com/a/520951
+     *
+     * This changes the working directory to your app's Resources folder. 
+     * (This is seperate from setting the location of the openFrameworks data directory)
+     *
+     * Assuming your app is still in the bin folder, you can then access the 
+     * ThinkGear.bundle in your bin/data/ directory by using "../../../data/ThinkGear.bundle"
+     * or in the addon
+     *
+     * See note below to make the app portable
+     *
+     * -Ivaylo
+     *
+     */
+    
+
     CFBundleRef mainBundle = CFBundleGetMainBundle();
     CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
     char path[PATH_MAX];
@@ -76,9 +69,22 @@ void ofxThinkGear::setup(string deviceName, int _id) {
     
     chdir(path);
     std::cout << "Current Path: " << path << std::endl;
-#endif
+
     
-    //////////////////
+    /*
+     * If you want to make the app portable, the ThinkGear.bundle needs
+     * travel with your app.
+     *
+     * In Xcode, you can add the build script below to your xcode project,
+     * which will copy the "data" directory into the app's Resources directory:
+     *
+     
+         cp -r bin/data/ThinkGear.bundle "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources";
+     
+     *
+     * Then #define OF_RELEASE in your header, or add OF_RELEASE as a preprocessor macro in your build settings
+     */
+    
 #ifdef OF_RELEASE
     bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
                                               CFSTR("data/ThinkGear.bundle"),
@@ -89,6 +95,7 @@ void ofxThinkGear::setup(string deviceName, int _id) {
                                               CFSTR("../../../data/ThinkGear.bundle"),
                                               kCFURLPOSIXPathStyle,
                                               true);
+#endif
 #endif
     
     

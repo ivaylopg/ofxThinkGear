@@ -18,6 +18,9 @@ Release*/
 # openFrameworks Specific #
 */bin/*
 
+/lib/*
+!/lib/*.txt
+
 */ThinkGear.bundle
 */ThinkGear.bundle/*
 
