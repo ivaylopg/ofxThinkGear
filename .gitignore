@@ -20,6 +20,8 @@ Release*/
 
 */ThinkGear.bundle
 */ThinkGear.bundle/*
+*/ThinkGear.framework
+*/ThinkGear.framework/*
 
 # Big Files #
 *.mov
