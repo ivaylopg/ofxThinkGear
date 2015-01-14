@@ -1,36 +1,36 @@
-#include "testApp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void testApp::setup(){
+void ofApp::setup(){
     ofSetVerticalSync(true);
     ofSetFrameRate(60);
     
     thinkGear.setup();
-    ofAddListener(thinkGear.attentionChangeEvent, this, &testApp::attentionListener);
-    ofAddListener(thinkGear.meditationChangeEvent, this, &testApp::meditationListener);
-    ofAddListener(thinkGear.blinkChangeEvent, this, &testApp::blinkListener);
+    ofAddListener(thinkGear.attentionChangeEvent, this, &ofApp::attentionListener);
+    ofAddListener(thinkGear.meditationChangeEvent, this, &ofApp::meditationListener);
+    ofAddListener(thinkGear.blinkChangeEvent, this, &ofApp::blinkListener);
     
     
-    ofAddListener(thinkGear.deltaChangeEvent, this, &testApp::deltaListener);
-    ofAddListener(thinkGear.thetaChangeEvent, this, &testApp::thetaListener);
-    ofAddListener(thinkGear.alpha1ChangeEvent, this, &testApp::alpha1Listener);
-    ofAddListener(thinkGear.alpha2ChangeEvent, this, &testApp::alpha2Listener);
-    ofAddListener(thinkGear.beta1ChangeEvent, this, &testApp::beta1Listener);
-    ofAddListener(thinkGear.beta2ChangeEvent, this, &testApp::beta2Listener);
-    ofAddListener(thinkGear.gamma1ChangeEvent, this, &testApp::gamma1Listener);
-    ofAddListener(thinkGear.gamma2ChangeEvent, this, &testApp::gamma2Listener);
+    ofAddListener(thinkGear.deltaChangeEvent, this, &ofApp::deltaListener);
+    ofAddListener(thinkGear.thetaChangeEvent, this, &ofApp::thetaListener);
+    ofAddListener(thinkGear.alpha1ChangeEvent, this, &ofApp::alpha1Listener);
+    ofAddListener(thinkGear.alpha2ChangeEvent, this, &ofApp::alpha2Listener);
+    ofAddListener(thinkGear.beta1ChangeEvent, this, &ofApp::beta1Listener);
+    ofAddListener(thinkGear.beta2ChangeEvent, this, &ofApp::beta2Listener);
+    ofAddListener(thinkGear.gamma1ChangeEvent, this, &ofApp::gamma1Listener);
+    ofAddListener(thinkGear.gamma2ChangeEvent, this, &ofApp::gamma2Listener);
     
     /*
      All of the available data points triggger ofEvents when they are updated. You only 
      need to declare listeners for the ones you need (usually just attention and meditation).
      
-     Even though you are calling thinkGear.update() every time through testApp::update(), 
+     Even though you are calling thinkGear.update() every time through ofApp::update(), 
      you will only get an event when the headset has new data, which is about once a second.
      
      This also ensures you are not reassigning old data to a variable. In this example, 
      the graph will only grow when the data is updated.
      
-     Make sure you call thinkGear.freeConnection() in testApp::exit() to properly 
+     Make sure you call thinkGear.freeConnection() in ofApp::exit() to properly 
      close the connection to the headset.
      */
     
@@ -49,12 +49,12 @@ void testApp::setup(){
 }
 
 //--------------------------------------------------------------
-void testApp::update(){
+void ofApp::update(){
     thinkGear.update();
 }
 
 //--------------------------------------------------------------
-void testApp::draw(){
+void ofApp::draw(){
     ofBackground(0);
     ofSetColor(255);
     string qStr = "";
@@ -119,7 +119,7 @@ void testApp::draw(){
 }
 
 //--------------------------------------------------------------
-void testApp::attentionListener(float &param)
+void ofApp::attentionListener(float &param)
 {
     attention = param;
     for (int i=0; i < atts.size(); i++) {
@@ -134,7 +134,7 @@ void testApp::attentionListener(float &param)
 }
 
 //--------------------------------------------------------------
-void testApp::meditationListener(float &param)
+void ofApp::meditationListener(float &param)
 {
     meditation = param;
     for (int i=0; i < meds.size(); i++) {
@@ -148,61 +148,61 @@ void testApp::meditationListener(float &param)
 }
 
 //--------------------------------------------------------------
-void testApp::blinkListener(float &param)
+void ofApp::blinkListener(float &param)
 {
     numBlinks++;
     lastBlinkVal = param;
 }
 
 //--------------------------------------------------------------
-void testApp::deltaListener(float &param)
+void ofApp::deltaListener(float &param)
 {
     delta = param;
 }
 
 //--------------------------------------------------------------
-void testApp::thetaListener(float &param)
+void ofApp::thetaListener(float &param)
 {
     theta = param;
 }
 
 //--------------------------------------------------------------
-void testApp::alpha1Listener(float &param)
+void ofApp::alpha1Listener(float &param)
 {
     alpha1 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::alpha2Listener(float &param)
+void ofApp::alpha2Listener(float &param)
 {
     alpha2 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::beta1Listener(float &param)
+void ofApp::beta1Listener(float &param)
 {
     beta1 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::beta2Listener(float &param)
+void ofApp::beta2Listener(float &param)
 {
     beta2 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::gamma1Listener(float &param)
+void ofApp::gamma1Listener(float &param)
 {
     gamma1 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::gamma2Listener(float &param)
+void ofApp::gamma2Listener(float &param)
 {
     gamma2 = param;
 }
 
 //--------------------------------------------------------------
-void testApp::exit(){
+void ofApp::exit(){
     thinkGear.freeConnection();
 }
