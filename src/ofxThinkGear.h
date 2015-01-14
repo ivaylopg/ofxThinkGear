@@ -15,8 +15,12 @@
 //       which continuously calls TG_ReadPacket( connectionId, -1 ) at 1ms intervals."
 //
 //  - The ThinkGear Communication Driver (aka, using the ThinkGear.bundle) is deprecated as of
-//    Version 2.5 of the MDT. Need to change this to use the Thinkgear SDK (the
+//    Version 2.5 of the Mindwave Developer Tools. Need to change this to use the Thinkgear SDK (the
 //    ThinkGear.framework) when OF updates to 64-bit.
+//
+//  - Make a Windows (.NET) version
+//
+//////////////
 
 
 #pragma once
@@ -67,7 +71,7 @@ public:
     void update();
     void autoUpdate();
     
-    // AutoRead Functions ////////////////////
+    // AutoRead Functions (Do not work yet) ////////////////////
     void startAutoRead();
     void stopAutoRead();
     // End AutoRead Functions ////////////////
@@ -99,8 +103,7 @@ public:
     ofEvent<bool> singleClickEvent;
     ofEvent<bool> doubleClickEvent;
     
-    // an array to hold values read from headset
-    float values[10];
+    float getValue(int v);
     bool ableToConnect;
     
     
@@ -131,5 +134,8 @@ private:
     
     bool bEnableBlinkAsClick;
     int prevBlinkTime;
+    
+    // an array to hold values read from headset
+    float values[10];
     
 };

@@ -429,6 +429,15 @@ bool ofxThinkGear::getIsConnected() {
 }
 
 //--------------------------------------------------------------
+float ofxThinkGear::getValue(int v){
+    if (v >= 0 && v < 10) {
+        return values[v];
+    } else {
+        return -1;
+    };
+}
+
+//--------------------------------------------------------------
 bool ofxThinkGear::getNewInfo() {
     return newInfo;
 }
