@@ -7,7 +7,6 @@
 //
 //
 //  Forked repo by Ivaylo Getov April 2014
-//  Place ThinkGear.bundle inside "data" folder
 //
 //  TO DO:
 //  - Implement TG_EnableAutoRead fuction:  From API:
