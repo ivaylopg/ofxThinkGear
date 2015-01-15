@@ -45,12 +45,14 @@ void ofApp::setup(){
     beta2 = 0.0;
     gamma1 = 0.0;
     gamma2 = 0.0;
+    
+    thinkGear.startAutoRead();
 
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    thinkGear.update();
+    //thinkGear.update();
 }
 
 //--------------------------------------------------------------

@@ -37,6 +37,11 @@ void ofxThinkGear::setup(string deviceName) {
 #ifdef __APPLE__
     
     /* * *
+    
+     
+     I wanted to build this in a way where you wouldn't have to import the bundle to your xcode project....all you'd have to do is add the addon.
+     
+     This seems hacky and I'm sure there is a better way to do this, but oh well.
      
      I was having trouble with discrepancies between xcode's working directory and the openFramweorks working directory when trying to load the ThinkGear.bundle. I found the following soulution here: http://stackoverflow.com/a/520951
      

@@ -64,7 +64,7 @@ public:
     void update();
     void autoUpdate();
     
-    // AutoRead Functions ////////////////////
+    // AutoRead Functions (These Do not work yet) ////////////////////
     void startAutoRead();
     void stopAutoRead();
     // End AutoRead Functions ////////////////
