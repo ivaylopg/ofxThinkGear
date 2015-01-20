@@ -448,6 +448,7 @@ void ofxThinkGear::freeConnection(){
         TG_FreeConnection(connectionID);
         ofLog() << "disconnecting connection ID: " << connectionID;
         isConnected = false;
+        reset();
         cout << "freed connection" << endl;
     }
 }
