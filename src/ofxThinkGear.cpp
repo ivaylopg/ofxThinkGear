@@ -143,6 +143,7 @@ void ofxThinkGear::setup(string deviceName) {
     switch (conResult) {
         case 0:
             ofLog() << "Connected to ID: " << connectionID << " at: " << deviceName << " ...";
+            cout << "Connected to ID: " << connectionID << " at: " << deviceName << " ..." << endl;
             ableToConnect = true;
             isConnected = true;
             break;
