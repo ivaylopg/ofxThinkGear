@@ -319,7 +319,7 @@ void ofxThinkGear::autoUpdate(){
     
     // function to manually read auto-updated values
     if (autoReading) {
-        // From API:
+        // From API Doc:
         // "While background auto-reading is enabled, the TG_GetValueStatus() function
         // is pretty much useless. Also, the TG_ReadPackets() function should probably not be called."
         
@@ -327,7 +327,6 @@ void ofxThinkGear::autoUpdate(){
         cout << "Autoreading is disabled! Use update() instead." << endl;
     }
 }
-
 //--------------------------------------------------------------
 void ofxThinkGear::startAutoRead() {
     if (isConnected){
@@ -402,6 +401,15 @@ bool ofxThinkGear::getIsConnected() {
 }
 
 //--------------------------------------------------------------
+float ofxThinkGear::getValue(int v){
+    if (v >= 0 && v < 10) {
+        return values[v];
+    } else {
+        return -1;
+    };
+}
+
+//--------------------------------------------------------------
 bool ofxThinkGear::getNewInfo() {
     return newInfo;
 }
@@ -412,6 +420,7 @@ void ofxThinkGear::freeConnection(){
         TG_FreeConnection(connectionID);
         ofLog() << "disconnecting connection ID: " << connectionID;
         isConnected = false;
+        reset();
         cout << "freed connection" << endl;
     }
 }
