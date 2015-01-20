@@ -3,6 +3,37 @@
 
 MindThread::MindThread() {
     count = 0;
+    
+    attention = 0.0;
+    meditation = 0.0;
+    delta = 0.0;
+    theta = 0.0;
+    alpha1 = 0.0;
+    alpha2 = 0.0;
+    beta1 = 0.0;
+    beta2 = 0.0;
+    gamma1 = 0.0;
+    gamma2 = 0.0;
+    
+    for (int i = 0; i < 10; i++) {
+        values[i] = 0.0;
+    }
+    
+    isConnected = false;
+}
+
+//--------------------------------------------------------------
+MindThread::~MindThread() {
+    //cout << "dead" << endl;
+    thinkGear.freeConnection();
+}
+
+//--------------------------------------------------------------
+void MindThread::connect() {
+    if (!isConnected) {
+        thinkGear.setup();
+        isConnected = true;
+    }
 }
 
 //--------------------------------------------------------------
@@ -21,26 +52,17 @@ void MindThread::threadedFunction() {
         // Attempt to lock the mutex.  If blocking is turned on,
         if(lock())
         {
-            // The mutex is now locked and the "count"
-            // variable is protected.  Time to modify it.
-            count++;
+            // The mutex is now locked and the variables are protected.
             
-            // Here, we simply cause it to reset to zero if it gets big.
-            if(count > 50000) count = 0;
             
-            // Unlock the mutex.  This is only
-            // called if lock() returned true above.
+
+            
+            // Unlock the mutex.  This is only called if lock() returned true above.
             unlock();
-            
-            // Sleep for 1 second.
             sleep(1000);
         }
         else
         {
-            // If we reach this else statement, it means that we could not
-            // lock our mutex, and so we do not need to call unlock().
-            // Calling unlock without locking will lead to problems.
-            
             ofLogWarning("threadedFunction()") << "Unable to lock mutex.";
         }
     }
@@ -48,33 +70,7 @@ void MindThread::threadedFunction() {
 
 //--------------------------------------------------------------
 void MindThread::draw() {
-    /// This drawing function cannot be called from the thread itself because
-    /// it includes OpenGL calls (ofDrawBitmapString).
     
-    std::stringstream ss;
-    
-    ss << "I am a slowly increasing thread. " << std::endl;
-    ss << "My current count is: ";
-    
-    if(lock())
-    {
-        // The mutex is now locked and the "count"
-        // variable is protected.  Time to read it.
-        ss << count;
-        
-        // Unlock the mutex.  This is only
-        // called if lock() returned true above.
-        unlock();
-    }
-    else
-    {
-        // If we reach this else statement, it means that we could not
-        // lock our mutex, and so we do not need to call unlock().
-        // Calling unlock without locking will lead to problems.
-        //ofLogWarning("threadedFunction()") << "Unable to lock mutex.";
-    }
-    
-    ofDrawBitmapString(ss.str(), 50, 56);
 }
 
 //--------------------------------------------------------------
