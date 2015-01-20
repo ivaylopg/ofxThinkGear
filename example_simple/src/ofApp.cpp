@@ -46,13 +46,13 @@ void ofApp::setup(){
     gamma1 = 0.0;
     gamma2 = 0.0;
     
-    thinkGear.startAutoRead();
+    //thinkGear.startAutoRead();
 
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    //thinkGear.update();
+    thinkGear.update();
 }
 
 //--------------------------------------------------------------

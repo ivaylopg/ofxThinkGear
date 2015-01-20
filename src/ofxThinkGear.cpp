@@ -317,44 +317,12 @@ void ofxThinkGear::update(){
 //--------------------------------------------------------------
 void ofxThinkGear::autoUpdate(){
     
+    // function to manually read auto-updated values
     if (autoReading) {
         // From API:
         // "While background auto-reading is enabled, the TG_GetValueStatus() function
         // is pretty much useless. Also, the TG_ReadPackets() function should probably not be called."
         
-        signalQuality = TG_GetValue(connectionID, TG_DATA_POOR_SIGNAL);
-        
-        cout << signalQuality << endl;
-        
-        if (signalQuality == 0.0)
-        {
-            
-            /*
-             reminder: values array is:
-             
-             values[0] is Attention
-             values[1] is Meditation
-             values[2] is Delta
-             values[3] is Theta
-             values[4] is Alpha 1
-             values[5] is Alpha 2
-             values[6] is Beta 1
-             values[7] is Beta 2
-             values[8] is Gamma 1
-             values[9] is Gamma 2
-             */
-            
-            
-            /* IN PROGRESS
-             
-             values[0] = TG_GetValue(connectionID, TG_DATA_ATTENTION);
-             values[1] = TG_GetValue(connectionID, TG_DATA_MEDITATION);
-             
-             for (int i=2; i<10; i++) {
-             values[i] = TG_GetValue(connectionID, i+3);
-             }
-             */
-        }
     } else {
         cout << "Autoreading is disabled! Use update() instead." << endl;
     }
